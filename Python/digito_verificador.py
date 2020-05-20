@@ -6,7 +6,7 @@ def dv(nr):
 
 def dvcpf(nr):
   d = dv(nr)
-  return '%s%s' % (d, dv(nr+d))
+  return str(d) + str(dv(nr+d))
 
 def checaDV(cta):
   return dv(cta[:-1]) == cta[-1]
