@@ -12,46 +12,40 @@ public class BoletoUtil {
 		return numero;
 	}
 
-	public void setNumero(String boleto) {
-		String campo = "";
-		String dvCampo = "";
-		
-		boleto = boleto.trim();
-		
-		String[] s = boleto.split(" ");
-		
+	public void setNumero(String numero) {
+		if (numero != null) {
+			decomporNumero(numero);
+			this.numero = String.format("%s%s%s%s%s", campo1, campo2, campo3, dvBarra, campo4);
+			this.codigoBarras = String.format("%s%s%s%s%s%s", campo1.substring(0, 4), dvBarra, campo4,
+					campo1.substring(4, 9), campo2.substring(0, 10), campo3.substring(0, 10));
+		}
+	}
+
+	private void decomporNumero(String numero) {
+		numero = numero.trim();
+		String[] s = numero.split(" ");
+
 		if (s.length > 0)
-			boleto = String.join("", s);
-		
-		s = boleto.split("\\.");
+			numero = String.join("", s);
+
+		s = numero.split("\\.");
 		if (s.length > 0)
-			boleto = String.join("", s);
-		
-		//3419109024 36669760195 28114610000 7 82000000009600
-		//1234567890 12345678901 23456789012 3 45678901234567
-		
-		campo = boleto.substring(0,10);
-		dvCampo = campo.substring(campo.length()-1);
-		
-		System.out.println(dvCampo);
-		
-		
-		
-		this.campo1 = boleto.substring(0,10);
-		
-		
-		this.campo1 += dvCampo(this.campo1);
-		
-//		this.campo2 = this.codigoBarras.substring(24, 34);
-//		this.campo2 += dvCampo(this.campo2);
-//		
-//		this.campo3 = this.codigoBarras.substring(34, 44);
-//		this.campo3 += dvCampo(this.campo3);
-//		
-//		this.campo4 = this.codigoBarras.substring(5, 19);
-//		this.dvBarra = this.codigoBarras.substring(4, 5);
-		
-		this.numero = boleto;
+			numero = String.join("", s);
+
+		String campo = numero.substring(0, 10);
+		if (isDvCampoOK(campo))
+			this.campo1 = campo;
+
+		campo = numero.substring(10, 21);
+		if (isDvCampoOK(campo))
+			this.campo2 = campo;
+
+		campo = numero.substring(21, 32);
+		if (isDvCampoOK(campo))
+			this.campo3 = campo;
+
+		this.campo4 = numero.substring(33, 47);
+		this.dvBarra = numero.substring(32, 33);
 	}
 
 	public String getCodigoBarras() {
@@ -71,22 +65,22 @@ public class BoletoUtil {
 
 		this.campo1 = campo1A + campo1B;
 		this.campo1 += dvCampo(this.campo1);
-		
+
 		this.campo2 = this.codigoBarras.substring(24, 34);
 		this.campo2 += dvCampo(this.campo2);
-		
+
 		this.campo3 = this.codigoBarras.substring(34, 44);
 		this.campo3 += dvCampo(this.campo3);
-		
+
 		this.campo4 = this.codigoBarras.substring(5, 19);
 		this.dvBarra = this.codigoBarras.substring(4, 5);
-		
-		setNumero(String.format("%s%s%s%s%s", campo1, campo2, campo3, dvBarra, campo4));
 
+		this.numero = String.format("%s%s%s%s%s", campo1, campo2, campo3, dvBarra, campo4);
 	}
 
-	public boolean isValida() {
-		if (null == this.codigoBarras) return false;
+	public boolean isValidoCodigoBarra() {
+		if (null == this.codigoBarras)
+			return false;
 
 		String barraSemDV = this.codigoBarras.substring(0, 4) + this.codigoBarras.substring(5, 44);
 		int dvBarra = Integer.parseInt(this.codigoBarras.substring(4, 5));
@@ -103,15 +97,22 @@ public class BoletoUtil {
 		}
 
 		int dv = 11 - (acum % 11);
-		if (dv == 0 || dv > 9) dv = 1;
+		if (dv == 0 || dv > 9)
+			dv = 1;
 		return (dv == dvBarra);
 	}
-	
+
+	private boolean isDvCampoOK(String campo) {
+		String numCampo = campo.substring(0, campo.length() - 1);
+		String dv = campo.substring(campo.length() - 1);
+		return dvCampo(numCampo).equals(dv);
+	}
+
 	private String dvCampo(String campo) {
 		int mult = 1;
 		int digit = 0;
 		int acum = 0;
-		
+
 		for (int i = campo.length(); i > 0; i--) {
 			mult = (mult == 1) ? 2 : 1;
 			digit = Integer.parseInt(campo.substring(i - 1, i));
@@ -128,8 +129,8 @@ public class BoletoUtil {
 		int d1 = res / 10;
 		return d1 + (res - (10 * d1));
 	}
-	
-	private String getStrBoleto(){
+
+	private String getStrBoleto() {
 		return String.format("%s %s %s %s %s", campo1, campo2, campo3, dvBarra, campo4);
 	}
 
